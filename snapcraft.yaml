@@ -20,8 +20,12 @@ apps:
         plugs: [home, network, network-bind, lxd]
 
 parts:
+    lxc:
+        plugin: nil
+        stage-snaps:
+        - lxd
+        prime:
+        - bin/lxc
     spread:
         plugin: go
         source: .
-        stage-packages:
-            - lxd-client
