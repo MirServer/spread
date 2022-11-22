@@ -600,7 +600,8 @@ func sshReloadCommand(distro Distro) []string {
 func (p *lxdProvider) tuneSSH(name string, distro Distro) error {
 	cmds := [][]string{
 		{"sed", "-i", `s/^\s*#\?\s*\(PermitRootLogin\|PasswordAuthentication\)\>.*/\1 yes/`, "/etc/ssh/sshd_config"},
-		{"/bin/sh", "-c", "[ -d /etc/ssh/sshd_config.d ] && echo PermitRootLogin yes\\\\nPasswordAuthentication yes > /etc/ssh/sshd_config.d/10-spread.conf"},
+		{"/bin/sh", "-c", "[ -d /etc/ssh/sshd_config.d ] && echo PermitRootLogin yes > /etc/ssh/sshd_config.d/10-spread.conf || true"},
+		{"/bin/sh", "-c", "[ -d /etc/ssh/sshd_config.d ] && echo PasswordAuthentication yes >> /etc/ssh/sshd_config.d/10-spread.conf || true"},
 		{"/bin/sh", "-c", fmt.Sprintf("echo root:'%s' | chpasswd", p.options.Password)},
 		sshReloadCommand(distro),
 	}
