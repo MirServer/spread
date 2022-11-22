@@ -113,12 +113,23 @@ func (s *lxdServer) Prepare(ctx context.Context) error {
 	args := []string{"exec", s.d.Name, "--"}
 	args = append(args, sshInstallCommand(s.Distro())...)
 
-
-	output, err := exec.Command("lxc", args...).CombinedOutput()
-	if err != nil {
-		printf("Command output: %s", output)
-		s.Discard(ctx)
-		return err
+	debugf("Trying Prepare with: lxc %v", args)
+	it := 1
+	var output []byte
+	var err error
+	for true {
+		output, err = exec.Command("lxc", args...).CombinedOutput()
+		if err == nil {
+		    debugf("Prepared, output: %s", output)
+		    break
+		}
+		debugf("Failed, output: %s", output)
+		if it >= 60 {
+			s.Discard(ctx)
+			return err
+		}
+		time.Sleep(time.Second)
+		it++
 	}
 
 	err = s.p.tuneSSH(s.d.Name, s.Distro())
@@ -589,6 +600,7 @@ func sshReloadCommand(distro Distro) []string {
 func (p *lxdProvider) tuneSSH(name string, distro Distro) error {
 	cmds := [][]string{
 		{"sed", "-i", `s/^\s*#\?\s*\(PermitRootLogin\|PasswordAuthentication\)\>.*/\1 yes/`, "/etc/ssh/sshd_config"},
+		{"/bin/sh", "-c", "[ -d /etc/ssh/sshd_config.d ] && echo PermitRootLogin yes\\\\nPasswordAuthentication yes > /etc/ssh/sshd_config.d/10-spread.conf"},
 		{"/bin/sh", "-c", fmt.Sprintf("echo root:'%s' | chpasswd", p.options.Password)},
 		sshReloadCommand(distro),
 	}
