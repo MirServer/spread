@@ -18,6 +18,8 @@ apps:
     spread:
         command: bin/spread
         plugs: [home, network, network-bind, lxd]
+        environment:
+          LXD_DIR: /var/snap/lxd/common/lxd
 
 parts:
     lxc:
