@@ -75,22 +75,31 @@ func (s *lxdServer) ReuseData() interface{} {
 }
 
 func (s *lxdServer) Distro() Distro {
-	// TODO: This doesn't handle explicit LXD image specifiers
-	// (like images:fedora/26)
+	// TODO: This only supports these two formats of image names:
+	// - systems:
+	//   - {distro}-{version}
+	//     image: images:{distro}/{version}
 	//
-	// Fixing that in general might require the user to specify the distro
+	// Making this generic might require the user to specify the distro
 	// in the spread.yaml metadata
+
 	parts := strings.Split(s.System().Image, "-")
-	if parts[0] == "ubuntu" {
+	images := strings.Split(s.System().Image, ":")
+	var image string;
+	if images[0] == "images" {
+		image = strings.Split(images[1], "/")[0]
+	}
+
+	if parts[0] == "ubuntu" || image == "ubuntu" {
 		return Ubuntu
 	}
-	if parts[0] == "debian" {
+	if parts[0] == "debian" || image == "debian" {
 		return Debian
 	}
-	if parts[0] == "fedora" {
+	if parts[0] == "fedora" || image == "fedora" {
 		return Fedora
 	}
-	if parts[0] == "alpine" {
+	if parts[0] == "alpine" || image == "alpine" {
 		return Alpine
 	}
 	return Unknown
