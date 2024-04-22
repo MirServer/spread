@@ -351,7 +351,7 @@ var errNoImage = fmt.Errorf("image not found")
 
 var lxdRemoteServer = map[string]string{
 	"ubuntu": "https://cloud-images.ubuntu.com/releases",
-	"images": "https://images.linuxcontainers.org",
+	"images": "https://images.lxd.canonical.com",
 }
 
 func (p *lxdProvider) lxdRemoteNames() (map[string]string, error) {
